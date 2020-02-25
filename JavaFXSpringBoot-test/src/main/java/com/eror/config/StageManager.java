@@ -4,6 +4,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Objects;
 
+import com.eror.bean.User;
 import org.slf4j.Logger;
 
 import com.eror.view.FxmlView;
@@ -26,7 +27,12 @@ public class StageManager {
         this.springFXMLLoader = springFXMLLoader;
         this.primaryStage = stage;
     }
-
+    public void setUser(User user){
+        primaryStage.setUserData(user);
+    }
+    public User getUser(){
+        return (User) primaryStage.getUserData();
+    }
     public void switchScene(final FxmlView view) {
         Parent viewRootNodeHierarchy = loadViewNodeHierarchy(view.getFxmlFile());
         show(viewRootNodeHierarchy, view.getTitle());

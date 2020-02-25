@@ -47,7 +47,7 @@ public class LoginController implements Initializable{
 	@FXML
     private void login(ActionEvent event) throws IOException{
     	if(userService.authenticate(getUsername(), getPassword())){
-    		    		
+			stageManager.setUser(userService.findByEmail(getUsername()));
     		stageManager.switchScene(FxmlView.USER);
     		
     	}else{

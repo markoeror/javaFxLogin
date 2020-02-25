@@ -48,6 +48,15 @@ import javafx.util.Callback;
 
 @Controller
 public class UserController implements Initializable{
+	private User user;
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
 
 	@FXML
     private Button btnLogout;
@@ -270,7 +279,8 @@ public class UserController implements Initializable{
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		
+		setUser(stageManager.getUser());
+		System.out.println(getUser().toString());
 		cbRole.setItems(roles);
 		
 		userTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
