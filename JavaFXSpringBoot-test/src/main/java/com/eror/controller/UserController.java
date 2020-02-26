@@ -172,7 +172,7 @@ public class UserController implements Initializable{
         			user.setLastName(getLastName());
         			user.setDob(getDob());
         			user.setGender(getGender());
-        			user.setRole(getRole());
+//        			user.setRole(getRole());
         			user.setEmail(getEmail());
         			user.setPassword(getPassword());
         			
@@ -187,7 +187,7 @@ public class UserController implements Initializable{
     			user.setLastName(getLastName());
     			user.setDob(getDob());
     			user.setGender(getGender());
-    			user.setRole(getRole());
+//    			user.setRole(getRole());
     			User updatedUser =  userService.update(user);
     			updateAlert(updatedUser);
     		}
@@ -377,7 +377,7 @@ public class UserController implements Initializable{
 					dob.setValue(user.getDob());
 					if(user.getGender().equals("Male")) rbMale.setSelected(true);
 					else rbFemale.setSelected(true);
-					cbRole.getSelectionModel().select(user.getRole());
+					cbRole.getSelectionModel().select(user.getRole().getName().toString());
 				}
 			};
 			return cell;

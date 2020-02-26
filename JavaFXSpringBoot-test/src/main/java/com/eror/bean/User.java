@@ -2,12 +2,7 @@ package com.eror.bean;
 
 import java.time.LocalDate;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name="User")
@@ -25,14 +20,24 @@ public class User {
 	private LocalDate dob;
 	
 	private String gender;
-	
-	private String role;
-	
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "role_id")
+	private Role role;
+
+
 	private String email;
 	
 	private String password;
 
-	
+
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
+	}
+
 	public long getId() {
 		return id;
 	}
@@ -56,7 +61,7 @@ public class User {
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
-	
+
 	public LocalDate getDob() {
 		return dob;
 	}
@@ -64,7 +69,7 @@ public class User {
 	public void setDob(LocalDate dob) {
 		this.dob = dob;
 	}
-	
+
 	public String getGender() {
 		return gender;
 	}
@@ -72,14 +77,7 @@ public class User {
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
-	
-	public String getRole() {
-		return role;
-	}
 
-	public void setRole(String role) {
-		this.role = role;
-	}
 
 	public String getEmail() {
 		return email;
