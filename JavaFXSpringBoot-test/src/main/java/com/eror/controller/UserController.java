@@ -10,7 +10,9 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.eror.model.Company;
 import com.eror.model.Role;
+import com.eror.service.CompanyService;
 import com.eror.service.RoleService;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.StringConverter;
@@ -55,13 +57,9 @@ import javafx.util.Callback;
 public class UserController implements Initializable{
 	private User user;
 
-	public User getUser() {
-		return user;
-	}
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+	@FXML
+	private Button company;
 
 	@FXML
     private Button btnLogout;
@@ -144,6 +142,8 @@ public class UserController implements Initializable{
 
 	@Autowired
 	private RoleService roleService;
+	@Autowired
+	private CompanyService companyService;
 
 	private ObservableList<User> userList = FXCollections.observableArrayList();
 //	private ObservableList<String> roles = FXCollections.observableArrayList("Admin", "User");
@@ -160,6 +160,7 @@ public class UserController implements Initializable{
     private void logout(ActionEvent event) throws IOException {
     	stageManager.switchScene(FxmlView.LOGIN);
     }
+
 
     @FXML
     void reset(ActionEvent event) {
@@ -293,6 +294,7 @@ public class UserController implements Initializable{
 		setUser(stageManager.getUser());
 		setUsersName();
 		roles.addAll(roleService.findAll());
+		List<Company> companies=companyService.findAll();
 		cbRole.setItems(roles);
 
 		userTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -450,5 +452,13 @@ public class UserController implements Initializable{
         	else alert.setContentText("Please Enter Valid "+ field);
         }
         alert.showAndWait();
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}
 }
