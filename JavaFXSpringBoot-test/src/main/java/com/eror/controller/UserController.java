@@ -3,19 +3,22 @@ package com.eror.controller;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.eror.bean.Role;
+import com.eror.model.Role;
 import com.eror.service.RoleService;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.StringConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 
-import com.eror.bean.User;
+import com.eror.model.User;
 import com.eror.config.StageManager;
 import com.eror.service.UserService;
 import com.eror.view.FxmlView;
@@ -180,7 +183,7 @@ public class UserController implements Initializable{
         			user.setRole(getRole());
         			user.setEmail(getEmail());
         			user.setPassword(getPassword());
-        			
+
         			User newUser = userService.save(user);
         			
         			saveAlert(newUser);
@@ -302,28 +305,30 @@ public class UserController implements Initializable{
 	 *  Set All userTable column properties
 	 */
 	private void setColumnProperties(){
-		/* Override date format in table
-		 * colDOB.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<LocalDate>() {
-			 String pattern = "dd/MM/yyyy";
-			 DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-		     @Override 
-		     public String toString(LocalDate date) {
-		         if (date != null) {
-		             return dateFormatter.format(date);
-		         } else {
-		             return "";
-		         }
-		     }
+//		Override date format in table
+//		 colDOB.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<LocalDate>() {
+//
+//			 String pattern = "dd/MM/yyyy";
+//			 DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+//		     @Override
+//		     public String toString(LocalDate date) {
+//		         if (date != null) {
+//		             return dateFormatter.format(date);
+//		         } else {
+//		             return "";
+//		         }
+//		     }
+//
+//		     @Override
+//		     public LocalDate fromString(String string) {
+//		         if (string != null && !string.isEmpty()) {
+//		             return LocalDate.parse(string, dateFormatter);
+//		         } else {
+//		             return null;
+//		         }
+//		     }
+//		 }));
 
-		     @Override 
-		     public LocalDate fromString(String string) {
-		         if (string != null && !string.isEmpty()) {
-		             return LocalDate.parse(string, dateFormatter);
-		         } else {
-		             return null;
-		         }
-		     }
-		 }));*/
 		
 		colUserId.setCellValueFactory(new PropertyValueFactory<>("id"));
 		colFirstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
@@ -390,14 +395,12 @@ public class UserController implements Initializable{
 	};
 
 	
-	
 	/*
 	 *  Add All users to observable list and update table
 	 */
 	private void loadUserDetails(){
 		userList.clear();
 		userList.addAll(userService.findAll());
-
 		userTable.setItems(userList);
 	}
 	

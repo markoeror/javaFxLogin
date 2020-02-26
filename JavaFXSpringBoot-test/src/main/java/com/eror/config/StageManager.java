@@ -4,7 +4,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Objects;
 
-import com.eror.bean.User;
+import com.eror.model.User;
 import org.slf4j.Logger;
 
 import com.eror.view.FxmlView;
