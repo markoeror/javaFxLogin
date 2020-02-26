@@ -9,6 +9,8 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.eror.bean.Role;
+import com.eror.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
@@ -83,7 +85,7 @@ public class UserController implements Initializable{
     private RadioButton rbFemale;
     
     @FXML
-    private ComboBox<String> cbRole;
+    private ComboBox<Role> cbRole;
 
     @FXML
     private TextField email;
@@ -133,10 +135,13 @@ public class UserController implements Initializable{
 	
 	@Autowired
 	private UserService userService;
-	
+
+	@Autowired
+	private RoleService roleService;
+
 	private ObservableList<User> userList = FXCollections.observableArrayList();
-	private ObservableList<String> roles = FXCollections.observableArrayList("Admin", "User");
-	
+//	private ObservableList<String> roles = FXCollections.observableArrayList("Admin", "User");
+	private ObservableList<Role> roles = FXCollections.observableArrayList();
 	@FXML
 	private void exit(ActionEvent event) {
 		Platform.exit();
@@ -172,7 +177,7 @@ public class UserController implements Initializable{
         			user.setLastName(getLastName());
         			user.setDob(getDob());
         			user.setGender(getGender());
-//        			user.setRole(getRole());
+        			user.setRole(getRole());
         			user.setEmail(getEmail());
         			user.setPassword(getPassword());
         			
@@ -187,7 +192,7 @@ public class UserController implements Initializable{
     			user.setLastName(getLastName());
     			user.setDob(getDob());
     			user.setGender(getGender());
-//    			user.setRole(getRole());
+    			user.setRole(getRole());
     			User updatedUser =  userService.update(user);
     			updateAlert(updatedUser);
     		}
@@ -264,7 +269,7 @@ public class UserController implements Initializable{
 		return rbMale.isSelected() ? "Male" : "Female";
 	}
 	
-	public String getRole() {
+	public Role getRole() {
 		return cbRole.getSelectionModel().getSelectedItem();
 	}
 
@@ -280,7 +285,7 @@ public class UserController implements Initializable{
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		setUser(stageManager.getUser());
-		System.out.println(getUser().toString());
+		roles.addAll(roleService.findAll());
 		cbRole.setItems(roles);
 		
 		userTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -377,7 +382,7 @@ public class UserController implements Initializable{
 					dob.setValue(user.getDob());
 					if(user.getGender().equals("Male")) rbMale.setSelected(true);
 					else rbFemale.setSelected(true);
-					cbRole.getSelectionModel().select(user.getRole().getName().toString());
+					cbRole.getSelectionModel().select(user.getRole());
 				}
 			};
 			return cell;
