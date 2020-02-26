@@ -45,6 +45,26 @@
    </top>
    <left>
       <VBox prefHeight="571.0" prefWidth="306.0" spacing="10.0" styleClass="background" stylesheets="@../styles/Styles.css" BorderPane.alignment="CENTER">
+          <HBox prefHeight="30.0" prefWidth="265.0">
+              <children>
+                  <Label text="Welcome  " textFill="#f8f7f7">
+                      <font>
+                          <Font size="15.0" />
+                      </font>
+                  </Label>
+                  <Label fx:id="usersName" textFill="#f8f7f7">
+                      <font>
+                          <Font size="15.0" />
+                      </font>
+                      <HBox.margin>
+                          <Insets left="5.0" />
+                      </HBox.margin>
+                  </Label>
+              </children>
+              <VBox.margin>
+                  <Insets left="25.0" />
+              </VBox.margin>
+          </HBox>
          <children>
             <Label text="Add New User" textFill="WHITE">
                <font>
