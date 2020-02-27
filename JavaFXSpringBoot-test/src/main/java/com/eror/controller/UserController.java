@@ -3,17 +3,24 @@ package com.eror.controller;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.eror.model.Company;
+import com.eror.model.Role;
+import com.eror.service.CompanyService;
+import com.eror.service.RoleService;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.StringConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 
-import com.eror.bean.User;
+import com.eror.model.User;
 import com.eror.config.StageManager;
 import com.eror.service.UserService;
 import com.eror.view.FxmlView;
@@ -50,20 +57,19 @@ import javafx.util.Callback;
 public class UserController implements Initializable{
 	private User user;
 
-	public User getUser() {
-		return user;
-	}
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+	@FXML
+	private Button company;
 
 	@FXML
     private Button btnLogout;
-	
+
 	@FXML
     private Label userId;
-	
+
+	@FXML
+	private Label usersName;
+
 	@FXML
     private TextField firstName;
 
@@ -72,7 +78,7 @@ public class UserController implements Initializable{
 
     @FXML
     private DatePicker dob;
-    
+
     @FXML
     private RadioButton rbMale;
 
@@ -81,22 +87,22 @@ public class UserController implements Initializable{
 
     @FXML
     private RadioButton rbFemale;
-    
+
     @FXML
-    private ComboBox<String> cbRole;
+    private ComboBox<Role> cbRole;
 
     @FXML
     private TextField email;
 
     @FXML
     private PasswordField password;
-    
+
     @FXML
     private Button reset;
-	
+
 	@FXML
     private Button saveUser;
-	
+
 	@FXML
 	private TableView<User> userTable;
 
@@ -114,29 +120,34 @@ public class UserController implements Initializable{
 
 	@FXML
 	private TableColumn<User, String> colGender;
-	
+
 	@FXML
     private TableColumn<User, String> colRole;
 
 	@FXML
 	private TableColumn<User, String> colEmail;
-	
+
 	@FXML
     private TableColumn<User, Boolean> colEdit;
-	
+
 	@FXML
     private MenuItem deleteUsers;
-	
+
 	@Lazy
     @Autowired
     private StageManager stageManager;
-	
+
 	@Autowired
 	private UserService userService;
-	
+
+	@Autowired
+	private RoleService roleService;
+	@Autowired
+	private CompanyService companyService;
+
 	private ObservableList<User> userList = FXCollections.observableArrayList();
-	private ObservableList<String> roles = FXCollections.observableArrayList("Admin", "User");
-	
+//	private ObservableList<String> roles = FXCollections.observableArrayList("Admin", "User");
+	private ObservableList<Role> roles = FXCollections.observableArrayList();
 	@FXML
 	private void exit(ActionEvent event) {
 		Platform.exit();
@@ -147,73 +158,74 @@ public class UserController implements Initializable{
 	 */
     @FXML
     private void logout(ActionEvent event) throws IOException {
-    	stageManager.switchScene(FxmlView.LOGIN);    	
+    	stageManager.switchScene(FxmlView.LOGIN);
     }
-    
+
+
     @FXML
     void reset(ActionEvent event) {
     	clearFields();
     }
-    
+
     @FXML
     private void saveUser(ActionEvent event){
-    	
+
     	if(validate("First Name", getFirstName(), "[a-zA-Z]+") &&
     	   validate("Last Name", getLastName(), "[a-zA-Z]+") &&
-    	   emptyValidation("DOB", dob.getEditor().getText().isEmpty()) && 
+    	   emptyValidation("DOB", dob.getEditor().getText().isEmpty()) &&
     	   emptyValidation("Role", getRole() == null) ){
-    		
+
     		if(userId.getText() == null || userId.getText() == ""){
     			if(validate("Email", getEmail(), "[a-zA-Z0-9][a-zA-Z0-9._]*@[a-zA-Z0-9]+([.][a-zA-Z]+)+") &&
     				emptyValidation("Password", getPassword().isEmpty())){
-    				
+
     				User user = new User();
         			user.setFirstName(getFirstName());
         			user.setLastName(getLastName());
         			user.setDob(getDob());
         			user.setGender(getGender());
-//        			user.setRole(getRole());
+        			user.setRole(getRole());
         			user.setEmail(getEmail());
         			user.setPassword(getPassword());
-        			
+
         			User newUser = userService.save(user);
-        			
+
         			saveAlert(newUser);
     			}
-    			
+
     		}else{
     			User user = userService.find(Long.parseLong(userId.getText()));
     			user.setFirstName(getFirstName());
     			user.setLastName(getLastName());
     			user.setDob(getDob());
     			user.setGender(getGender());
-//    			user.setRole(getRole());
+    			user.setRole(getRole());
     			User updatedUser =  userService.update(user);
     			updateAlert(updatedUser);
     		}
-    		
+    		setUsersName();
     		clearFields();
     		loadUserDetails();
     	}
-    	
-    	
+
+
     }
-    
+
     @FXML
     private void deleteUsers(ActionEvent event){
     	List<User> users = userTable.getSelectionModel().getSelectedItems();
-    	
+
     	Alert alert = new Alert(AlertType.CONFIRMATION);
 		alert.setTitle("Confirmation Dialog");
 		alert.setHeaderText(null);
 		alert.setContentText("Are you sure you want to delete selected?");
 		Optional<ButtonType> action = alert.showAndWait();
-		
+
 		if(action.get() == ButtonType.OK) userService.deleteInBatch(users);
-    	
+
     	loadUserDetails();
     }
-    
+
    	private void clearFields() {
 		userId.setText(null);
 		firstName.clear();
@@ -225,25 +237,25 @@ public class UserController implements Initializable{
 		email.clear();
 		password.clear();
 	}
-	
+
 	private void saveAlert(User user){
-		
+
 		Alert alert = new Alert(AlertType.INFORMATION);
 		alert.setTitle("User saved successfully.");
 		alert.setHeaderText(null);
 		alert.setContentText("The user "+user.getFirstName()+" "+user.getLastName() +" has been created and \n"+getGenderTitle(user.getGender())+" id is "+ user.getId() +".");
 		alert.showAndWait();
 	}
-	
+
 	private void updateAlert(User user){
-		
+
 		Alert alert = new Alert(AlertType.INFORMATION);
 		alert.setTitle("User updated successfully.");
 		alert.setHeaderText(null);
 		alert.setContentText("The user "+user.getFirstName()+" "+user.getLastName() +" has been updated.");
 		alert.showAndWait();
 	}
-	
+
 	private String getGenderTitle(String gender){
 		return (gender.equals("Male")) ? "his" : "her";
 	}
@@ -263,8 +275,8 @@ public class UserController implements Initializable{
 	public String getGender(){
 		return rbMale.isSelected() ? "Male" : "Female";
 	}
-	
-	public String getRole() {
+
+	public Role getRole() {
 		return cbRole.getSelectionModel().getSelectedItem();
 	}
 
@@ -275,51 +287,58 @@ public class UserController implements Initializable{
 	public String getPassword() {
 		return password.getText();
 	}
-  
+
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		setUser(stageManager.getUser());
-		System.out.println(getUser().toString());
+		setUsersName();
+		roles.addAll(roleService.findAll());
+		List<Company> companies=companyService.findAll();
 		cbRole.setItems(roles);
-		
+
 		userTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-		
+
 		setColumnProperties();
-		
+
 		// Add all users into table
 		loadUserDetails();
 	}
-	
-	
-	
+
+	private void setUsersName() {
+		usersName.setText(getUser().getFirstName()+" "+getUser().getLastName());
+	}
+
+
 	/*
 	 *  Set All userTable column properties
 	 */
 	private void setColumnProperties(){
-		/* Override date format in table
-		 * colDOB.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<LocalDate>() {
-			 String pattern = "dd/MM/yyyy";
-			 DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-		     @Override 
-		     public String toString(LocalDate date) {
-		         if (date != null) {
-		             return dateFormatter.format(date);
-		         } else {
-		             return "";
-		         }
-		     }
+//		Override date format in table
+//		 colDOB.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<LocalDate>() {
+//
+//			 String pattern = "dd/MM/yyyy";
+//			 DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+//		     @Override
+//		     public String toString(LocalDate date) {
+//		         if (date != null) {
+//		             return dateFormatter.format(date);
+//		         } else {
+//		             return "";
+//		         }
+//		     }
+//
+//		     @Override
+//		     public LocalDate fromString(String string) {
+//		         if (string != null && !string.isEmpty()) {
+//		             return LocalDate.parse(string, dateFormatter);
+//		         } else {
+//		             return null;
+//		         }
+//		     }
+//		 }));
 
-		     @Override 
-		     public LocalDate fromString(String string) {
-		         if (string != null && !string.isEmpty()) {
-		             return LocalDate.parse(string, dateFormatter);
-		         } else {
-		             return null;
-		         }
-		     }
-		 }));*/
-		
+
 		colUserId.setCellValueFactory(new PropertyValueFactory<>("id"));
 		colFirstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
 		colLastName.setCellValueFactory(new PropertyValueFactory<>("lastName"));
@@ -329,8 +348,8 @@ public class UserController implements Initializable{
 		colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
 		colEdit.setCellFactory(cellFactory);
 	}
-	
-	Callback<TableColumn<User, Boolean>, TableCell<User, Boolean>> cellFactory = 
+
+	Callback<TableColumn<User, Boolean>, TableCell<User, Boolean>> cellFactory =
 			new Callback<TableColumn<User, Boolean>, TableCell<User, Boolean>>()
 	{
 		@Override
@@ -340,7 +359,7 @@ public class UserController implements Initializable{
 			{
 				Image imgEdit = new Image(getClass().getResourceAsStream("/images/edit.png"));
 				final Button btnEdit = new Button();
-				
+
 				@Override
 				public void updateItem(Boolean check, boolean empty)
 				{
@@ -351,11 +370,12 @@ public class UserController implements Initializable{
 						setText(null);
 					}
 					else{
+						// Here we select collumn from table to get selected User
 						btnEdit.setOnAction(e ->{
 							User user = getTableView().getItems().get(getIndex());
 							updateUser(user);
 						});
-						
+
 						btnEdit.setStyle("-fx-background-color: transparent;");
 						ImageView iv = new ImageView();
 				        iv.setImage(imgEdit);
@@ -363,7 +383,7 @@ public class UserController implements Initializable{
 				        iv.setSmooth(true);
 				        iv.setCache(true);
 						btnEdit.setGraphic(iv);
-						
+
 						setGraphic(btnEdit);
 						setAlignment(Pos.CENTER);
 						setText(null);
@@ -377,25 +397,23 @@ public class UserController implements Initializable{
 					dob.setValue(user.getDob());
 					if(user.getGender().equals("Male")) rbMale.setSelected(true);
 					else rbFemale.setSelected(true);
-					cbRole.getSelectionModel().select(user.getRole().getName().toString());
+					cbRole.getSelectionModel().select(user.getRole());
 				}
 			};
 			return cell;
 		}
 	};
 
-	
-	
+
 	/*
 	 *  Add All users to observable list and update table
 	 */
 	private void loadUserDetails(){
 		userList.clear();
 		userList.addAll(userService.findAll());
-
 		userTable.setItems(userList);
 	}
-	
+
 	/*
 	 * Validations
 	 */
@@ -406,24 +424,24 @@ public class UserController implements Initializable{
 	        if(m.find() && m.group().equals(value)){
 	            return true;
 	        }else{
-	        	validationAlert(field, false);            
-	            return false;            
+	        	validationAlert(field, false);
+	            return false;
 	        }
 		}else{
-			validationAlert(field, true);            
+			validationAlert(field, true);
             return false;
-		}        
+		}
     }
-	
+
 	private boolean emptyValidation(String field, boolean empty){
         if(!empty){
             return true;
         }else{
-        	validationAlert(field, true);            
-            return false;            
+        	validationAlert(field, true);
+            return false;
         }
-    }	
-	
+    }
+
 	private void validationAlert(String field, boolean empty){
 		Alert alert = new Alert(AlertType.WARNING);
         alert.setTitle("Validation Error");
@@ -434,5 +452,13 @@ public class UserController implements Initializable{
         	else alert.setContentText("Please Enter Valid "+ field);
         }
         alert.showAndWait();
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}
 }

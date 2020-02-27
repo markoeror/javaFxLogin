@@ -3,7 +3,7 @@ package com.eror.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.eror.bean.User;
+import com.eror.model.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {

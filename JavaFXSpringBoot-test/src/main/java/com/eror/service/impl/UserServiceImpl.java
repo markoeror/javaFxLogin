@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.eror.bean.User;
+import com.eror.model.User;
 import com.eror.repository.UserRepository;
 import com.eror.service.UserService;
 
@@ -42,6 +42,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<User> findAll() {
+
 		return userRepository.findAll();
 	}
 
